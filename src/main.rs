@@ -1,21 +1,19 @@
-extern crate glob;
 extern crate structopt;
 extern crate usvg;
 
 mod stripper;
 
-use glob::glob;
 use std::fs::File;
 use std::io::prelude::*;
 use std::option::Option;
-use std::result::Result;
 use structopt::StructOpt;
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(StructOpt)]
 struct Cli {
     /// The path to the file to read
-    path: String,
+    #[structopt(parse(from_os_str))]
+    paths: Vec<std::path::PathBuf>,
 
     #[structopt(parse(from_os_str), short = "o", long = "output-dir")]
     output_dir: Option<std::path::PathBuf>,
@@ -37,6 +35,15 @@ struct Cli {
         env = "PEN_DOWN_HEIGHT"
     )]
     pen_down_height: f64,
+
+    /// the value to send for G1 commands when dropping the pen
+    #[structopt(
+        short = "s",
+        long = "max-speed",
+        default_value = "10000",
+        env = "MAX_G1_SPEED"
+    )]
+    max_line_speed: f64,
 }
 
 fn main() {
@@ -51,9 +58,10 @@ fn main() {
     let params = stripper::Params {
         pen_up_height: args.pen_up_height,
         pen_down_height: args.pen_down_height,
+        max_line_speed: args.max_line_speed,
     };
 
-    for p in glob(&args.path).unwrap().filter_map(Result::ok) {
+    for p in args.paths {
         let rtree = usvg::Tree::from_file(&p, &usvg::Options::default()).unwrap();
         let (stripped_svg, gcode) = stripper::strip(&rtree, XML_OPT, &params);
 
