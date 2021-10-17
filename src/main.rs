@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::option::Option;
 use structopt::StructOpt;
 
-/// Search for a pattern in a file and display the lines that contain it.
+/// Convert SVG file to G-code suitable for plotting with an Eleksdraw
 #[derive(StructOpt)]
 struct Cli {
     /// The path to the file to read
