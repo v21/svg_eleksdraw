@@ -109,7 +109,7 @@ pub fn strip(tree: &usvg::Tree, xml_opt: usvg::XmlOptions, params: &Params) -> (
         }
     }
 
-    state.gcode.push_str("M3 S0\n"); //full pen up
+    state = maybe_pen_up(state); //full pen up
     state.gcode.push_str(&format!("G0 X0 Y0\n")); //return to origin
 
     return (state.svg.end_document(), state.gcode);
@@ -123,7 +123,7 @@ fn check_bounds_and_pause(mut state: State) -> State {
     state.svg.write_attribute("stroke", "red");
     state.svg.write_attribute("fill", "none");
 
-    state.gcode.push_str("M3 S0\n"); //full pen up
+    state = maybe_pen_up(state);
 
     let mut path = String::new();
 
